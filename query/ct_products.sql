@@ -3,6 +3,7 @@ CREATE TABLE products(
 	, name TEXT NOT NULL DEFAULT ''
 	, quantity INT NOT NULL DEFAULT 0
 	, image_path VARCHAR(255) DEFAULT ''
+	, is_delete BOOLEAN DEFAULT FALSE
 	, created_at TIMESTAMP DEFAULT NOW()
 	, updated_at TIMESTAMP DEFAULT NOW()
 );

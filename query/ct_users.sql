@@ -4,7 +4,7 @@ CREATE TABLE users(
 	, name VARCHAR(255) NOT NULL DEFAULT ''
 	, email VARCHAR(255) NOT NULL
 	, password_hash TEXT NOT NULL
-	, is_active BOOLEAN DEFAULT FALSE
+	, is_active BOOLEAN DEFAULT TRUE
 	, created_at TIMESTAMP DEFAULT NOW()
 	, updated_at TIMESTAMP DEFAULT NOW()
 );
