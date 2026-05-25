@@ -1,0 +1,10 @@
+CREATE TABLE users(
+	id SERIAL PRIMARY KEY
+	, role_id INT NOT NULL REFERENCES roles(id)
+	, name VARCHAR(255) NOT NULL DEFAULT ''
+	, email VARCHAR(255) NOT NULL
+	, password_hash TEXT NOT NULL
+	, is_active BOOLEAN DEFAULT FALSE
+	, created_at TIMESTAMP DEFAULT NOW()
+	, updated_at TIMESTAMP DEFAULT NOW()
+);
