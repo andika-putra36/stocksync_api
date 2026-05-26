@@ -1,5 +1,5 @@
 /*
-	SELECT * FROM ;
+	SELECT * FROM get_login_credential('andika@mail.test');
 */
 
 CREATE OR REPLACE FUNCTION get_login_credential(
