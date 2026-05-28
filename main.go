@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"stocksync_api/internal/config"
+)
 
 func main() {
-	fmt.Println("Hello World")
+	router := config.InitializeEverything()
+	router.Run(":8888")
 }
