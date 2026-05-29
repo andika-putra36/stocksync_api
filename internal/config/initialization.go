@@ -14,12 +14,14 @@ import (
 
 func InitializeEverything() *gin.Engine {
 	db := initializeDB()
-	fmt.Println(db)
+	userRepository := user.NewRepository(db)
+	userService := user.NewService(userRepository)
+	userHandler := user.NewHandler(userService)
 
 	router := gin.Default()
 	v1 := router.Group("api/v1")
 
-	user.RegisterRoutes(v1)
+	user.RegisterRoutes(v1, *userHandler)
 	return router
 }
 
