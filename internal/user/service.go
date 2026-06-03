@@ -1,9 +1,8 @@
 package user
 
 import (
-	"errors"
-
-	"golang.org/x/crypto/bcrypt"
+	"stocksync_api/pkg/bcrypt"
+	"stocksync_api/pkg/jwt"
 )
 
 type Service interface {
@@ -21,26 +20,37 @@ func NewService(repository Repository) *service {
 func (s *service) LogIn(input LoginRequest) (LoginResponse, error) {
 	var loginCredential GetLoginCredentialResponse
 
+	// Fetch data
 	loginCredential, err := s.repository.GetLoginCredentials(input)
 	if err != nil {
 		return LoginResponse{}, err
 	}
 
-	err = ComparePassword(loginCredential.PasswordHash, input.Password)
+	// Compare password
+	err = bcrypt.ComparePassword(loginCredential.PasswordHash, input.Password)
 	if err != nil {
 		return LoginResponse{}, err
 	}
 
-	return LoginResponse{IsLoggedIn: true}, nil
+	// Generate access token
+	accessToken, err := jwt.GenerateAccessToken(loginCredential.UserID, loginCredential.Email)
+	if err != nil {
+		return LoginResponse{}, err
+	}
+
+	return LoginResponse{
+		// IsLoggedIn:  true,
+		AccessToken: accessToken,
+	}, nil
 }
 
-func ComparePassword(hashedPassword, plainPassword string) error {
-	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
-	if err != nil {
-		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return errors.New("invalid credentials")
-		}
-		return errors.New("failed to compare password")
-	}
-	return nil
-}
+// func ComparePassword(hashedPassword, plainPassword string) error {
+// 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
+// 	if err != nil {
+// 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+// 			return errors.New("invalid credentials")
+// 		}
+// 		return errors.New("failed to compare password")
+// 	}
+// 	return nil
+// }
