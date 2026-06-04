@@ -26,3 +26,29 @@ func (r *repository) GetLoginCredentials(input LoginRequest) (GetLoginCredential
 	}
 	return response, nil
 }
+
+func (r *repository) SaveRefreshToken(input SaveRefreshTokenRequest) error {
+	err := r.db.Exec(
+		`CALL save_refresh_token(?, ?, ?)`,
+		input.UserID,
+		input.Token,
+		input.ExpiredAt,
+	).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *repository) GetRefreshToken(token string) (GetRefreshTokenResponse, error) {
+	var response GetRefreshTokenResponse
+
+	err := r.db.Raw(
+		`SELECT * FROM get_refresh_token(?)`,
+		token,
+	).Scan(&response).Error
+	if err != nil {
+		return response, err
+	}
+	return response, nil
+}
