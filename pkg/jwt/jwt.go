@@ -1,6 +1,8 @@
 package jwt
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"os"
 	"time"
 
@@ -24,4 +26,17 @@ func GenerateAccessToken(userID int, email string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
+}
+
+func GenerateRefreshToken() (string, time.Time, error) {
+	bytes := make([]byte, 32)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	token := hex.EncodeToString(bytes)
+	expiredAt := time.Now().UTC().Add(7 * 24 * time.Hour) // Expires in 7 Days
+
+	return token, expiredAt, nil
 }

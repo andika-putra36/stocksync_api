@@ -38,19 +38,25 @@ func (s *service) LogIn(input LoginRequest) (LoginResponse, error) {
 		return LoginResponse{}, err
 	}
 
+	// Generate refresh token
+	refreshToken, expiredAt, err := jwt.GenerateRefreshToken()
+	if err != nil {
+		return LoginResponse{}, err
+	}
+
+	//Store refresh token in DB
+	err = s.repository.SaveRefreshToken(SaveRefreshTokenRequest{
+		UserID:    loginCredential.UserID,
+		Token:     refreshToken,
+		ExpiredAt: expiredAt,
+	})
+	if err != nil {
+		return LoginResponse{}, err
+	}
+
 	return LoginResponse{
 		// IsLoggedIn:  true,
-		AccessToken: accessToken,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}, nil
 }
-
-// func ComparePassword(hashedPassword, plainPassword string) error {
-// 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
-// 	if err != nil {
-// 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-// 			return errors.New("invalid credentials")
-// 		}
-// 		return errors.New("failed to compare password")
-// 	}
-// 	return nil
-// }

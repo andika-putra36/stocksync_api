@@ -4,6 +4,7 @@ import "gorm.io/gorm"
 
 type Repository interface {
 	GetLoginCredentials(input LoginRequest) (GetLoginCredentialResponse, error)
+	SaveRefreshToken(input SaveRefreshTokenRequest) error
 }
 
 type repository struct {
