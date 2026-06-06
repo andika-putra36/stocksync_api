@@ -3,6 +3,7 @@ package jwt
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"os"
 	"time"
 
@@ -39,4 +40,23 @@ func GenerateRefreshToken() (string, time.Time, error) {
 	expiredAt := time.Now().UTC().Add(7 * 24 * time.Hour) // Expires in 7 Days
 
 	return token, expiredAt, nil
+}
+
+func ValidateAccessToken(accessToken string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(accessToken, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(*Claims)
+	if !ok {
+		return nil, errors.New("invalid claims")
+	}
+
+	return claims, nil
 }
