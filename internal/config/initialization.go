@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"stocksync_api/internal/user"
+	"stocksync_api/internal/auth"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -14,14 +14,14 @@ import (
 
 func InitializeEverything() *gin.Engine {
 	db := initializeDB()
-	userRepository := user.NewRepository(db)
-	userService := user.NewService(userRepository)
-	userHandler := user.NewHandler(userService)
+	authRepository := auth.NewRepository(db)
+	authService := auth.NewService(authRepository)
+	authHandler := auth.NewHandler(authService)
 
 	router := gin.Default()
 	v1 := router.Group("api/v1")
 
-	user.RegisterRoutes(v1, *userHandler)
+	auth.RegisterRoutes(v1, *authHandler)
 	return router
 }
 

@@ -10,3 +10,5 @@ BEGIN
 	VALUES(p_user_id, p_token, p_expired_at);
 END;
 $$;
+
+DROP PROCEDURE insert_refresh_token

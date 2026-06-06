@@ -1,12 +1,15 @@
-package user
+package auth
 
 import (
+	"errors"
 	"stocksync_api/pkg/bcrypt"
 	"stocksync_api/pkg/jwt"
+	"time"
 )
 
 type Service interface {
 	LogIn(input LoginRequest) (LoginResponse, error)
+	RefreshToken(input RefreshTokenRequest) (LoginResponse, error)
 }
 
 type service struct {
@@ -58,5 +61,45 @@ func (s *service) LogIn(input LoginRequest) (LoginResponse, error) {
 		// IsLoggedIn:  true,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+	}, nil
+}
+
+func (s *service) RefreshToken(input RefreshTokenRequest) (LoginResponse, error) {
+	tokenData, err := s.repository.GetRefreshToken(input.RefreshToken)
+	if err != nil {
+		return LoginResponse{}, err
+	}
+
+	if time.Now().UTC().After(tokenData.ExpiredAt) {
+		return LoginResponse{}, errors.New("Refresh token expired")
+	}
+
+	accessToken, err := jwt.GenerateAccessToken(tokenData.UserID, tokenData.Email)
+	if err != nil {
+		return LoginResponse{}, err
+	}
+
+	newRefreshToken, expiredAt, err := jwt.GenerateRefreshToken()
+	if err != nil {
+		return LoginResponse{}, err
+	}
+
+	err = s.repository.DeleteRefreshToken(tokenData.UserID)
+	if err != nil {
+		return LoginResponse{}, err
+	}
+
+	err = s.repository.SaveRefreshToken(SaveRefreshTokenRequest{
+		UserID:    tokenData.UserID,
+		Token:     newRefreshToken,
+		ExpiredAt: expiredAt,
+	})
+	if err != nil {
+		return LoginResponse{}, err
+	}
+
+	return LoginResponse{
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken,
 	}, nil
 }

@@ -1,4 +1,4 @@
-package user
+package auth
 
 import "time"
 
@@ -13,9 +13,6 @@ type SaveRefreshTokenRequest struct {
 	ExpiredAt time.Time `json:"expired_at"`
 }
 
-type GetRefreshTokenResponse struct {
-	ID        int       `json:"id"`
-	UserID    int       `json:"user_id"`
-	Token     string    `json:"token"`
-	ExpiredAt time.Time `json:"expired_at"`
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token"`
 }

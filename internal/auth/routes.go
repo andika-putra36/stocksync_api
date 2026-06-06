@@ -1,4 +1,4 @@
-package user
+package auth
 
 import (
 	"net/http"
@@ -12,5 +12,6 @@ func RegisterRoutes(router *gin.RouterGroup, h handler) {
 			"test": "test",
 		})
 	})
-	router.POST("/user/login", h.LogIn)
+	router.POST("/auth/login", h.LogIn)
+	router.POST("/auth/refresh-token", h.RefreshToken)
 }
