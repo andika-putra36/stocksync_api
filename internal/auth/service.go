@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"stocksync_api/internal/user"
 	"stocksync_api/pkg/bcrypt"
 	"stocksync_api/pkg/jwt"
 	"time"
@@ -9,7 +10,7 @@ import (
 
 type Service interface {
 	LogIn(input LoginRequest) (LoginResponse, error)
-	RefreshToken(input RefreshTokenRequest) (LoginResponse, error)
+	RefreshToken(input RefreshTokenRequest) (RefreshTokenResponse, error)
 }
 
 type service struct {
@@ -47,7 +48,13 @@ func (s *service) LogIn(input LoginRequest) (LoginResponse, error) {
 		return LoginResponse{}, err
 	}
 
-	//Store refresh token in DB
+	// Delete refresh token in DB if exists
+	err = s.repository.DeleteRefreshToken(loginCredential.UserID)
+	if err != nil {
+		return LoginResponse{}, err
+	}
+
+	// Store refresh token in DB
 	err = s.repository.SaveRefreshToken(SaveRefreshTokenRequest{
 		UserID:    loginCredential.UserID,
 		Token:     refreshToken,
@@ -59,34 +66,39 @@ func (s *service) LogIn(input LoginRequest) (LoginResponse, error) {
 
 	return LoginResponse{
 		// IsLoggedIn:  true,
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		User: user.GetUserInformationResponse{
+			// UserName: ,
+		},
+		Token: Token{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+		},
 	}, nil
 }
 
-func (s *service) RefreshToken(input RefreshTokenRequest) (LoginResponse, error) {
+func (s *service) RefreshToken(input RefreshTokenRequest) (RefreshTokenResponse, error) {
 	tokenData, err := s.repository.GetRefreshToken(input.RefreshToken)
 	if err != nil {
-		return LoginResponse{}, err
+		return RefreshTokenResponse{}, err
 	}
 
 	if time.Now().UTC().After(tokenData.ExpiredAt) {
-		return LoginResponse{}, errors.New("Refresh token expired")
+		return RefreshTokenResponse{}, errors.New("Refresh token expired")
 	}
 
 	accessToken, err := jwt.GenerateAccessToken(tokenData.UserID, tokenData.Email)
 	if err != nil {
-		return LoginResponse{}, err
+		return RefreshTokenResponse{}, err
 	}
 
 	newRefreshToken, expiredAt, err := jwt.GenerateRefreshToken()
 	if err != nil {
-		return LoginResponse{}, err
+		return RefreshTokenResponse{}, err
 	}
 
 	err = s.repository.DeleteRefreshToken(tokenData.UserID)
 	if err != nil {
-		return LoginResponse{}, err
+		return RefreshTokenResponse{}, err
 	}
 
 	err = s.repository.SaveRefreshToken(SaveRefreshTokenRequest{
@@ -95,10 +107,10 @@ func (s *service) RefreshToken(input RefreshTokenRequest) (LoginResponse, error)
 		ExpiredAt: expiredAt,
 	})
 	if err != nil {
-		return LoginResponse{}, err
+		return RefreshTokenResponse{}, err
 	}
 
-	return LoginResponse{
+	return RefreshTokenResponse{
 		AccessToken:  accessToken,
 		RefreshToken: newRefreshToken,
 	}, nil

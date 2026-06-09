@@ -1,6 +1,9 @@
 package auth
 
-import "time"
+import (
+	"stocksync_api/internal/user"
+	"time"
+)
 
 type GetLoginCredentialResponse struct {
 	UserID       int    `json:"user_id"`
@@ -10,8 +13,8 @@ type GetLoginCredentialResponse struct {
 }
 
 type LoginResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	User  user.GetUserInformationResponse `json:"user"`
+	Token Token                           `json:"token"`
 }
 
 type GetRefreshTokenResponse struct {
@@ -21,3 +24,15 @@ type GetRefreshTokenResponse struct {
 	Token     string    `json:"token"`
 	ExpiredAt time.Time `json:"expired_at"`
 }
+
+type RefreshTokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+type Token struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+// type GetUserInformation
