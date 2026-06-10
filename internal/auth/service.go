@@ -14,11 +14,15 @@ type Service interface {
 }
 
 type service struct {
-	repository Repository
+	repository     Repository
+	userRepository user.Repository
 }
 
-func NewService(repository Repository) *service {
-	return &service{repository}
+func NewService(repository Repository, userRepository user.Repository) *service {
+	return &service{
+		repository,
+		userRepository,
+	}
 }
 
 func (s *service) LogIn(input LoginRequest) (LoginResponse, error) {
@@ -64,10 +68,18 @@ func (s *service) LogIn(input LoginRequest) (LoginResponse, error) {
 		return LoginResponse{}, err
 	}
 
+	userInformation, err := s.userRepository.GetUserInformation(loginCredential.UserID)
+	if err != nil {
+		return LoginResponse{}, err
+	}
+
 	return LoginResponse{
 		// IsLoggedIn:  true,
 		User: user.GetUserInformationResponse{
-			// UserName: ,
+			UserName: userInformation.UserName,
+			RoleID:   userInformation.RoleID,
+			RoleName: userInformation.RoleName,
+			IsActive: userInformation.IsActive,
 		},
 		Token: Token{
 			AccessToken:  accessToken,

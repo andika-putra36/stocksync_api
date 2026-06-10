@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"stocksync_api/internal/auth"
+	"stocksync_api/internal/user"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -15,7 +16,9 @@ import (
 func InitializeEverything() *gin.Engine {
 	db := initializeDB()
 	authRepository := auth.NewRepository(db)
-	authService := auth.NewService(authRepository)
+	userRepository := user.NewRepository(db)
+
+	authService := auth.NewService(authRepository, userRepository)
 	authHandler := auth.NewHandler(authService)
 
 	router := gin.Default()
