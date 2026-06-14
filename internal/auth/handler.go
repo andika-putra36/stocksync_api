@@ -59,3 +59,5 @@ func (h *handler) RefreshToken(c *gin.Context) {
 		"data": response,
 	})
 }
+
+func (h *handler) GetClaims()

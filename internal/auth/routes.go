@@ -15,11 +15,12 @@ func RegisterRoutes(router *gin.RouterGroup, h handler) {
 	protected := router.Group("/")
 	protected.Use(middleware.AuthMiddleware())
 	{
-		protected.GET("auth/me", func(c *gin.Context) {
+		protected.GET("auth/get-claims", func(c *gin.Context) {
 			claims := c.MustGet("claims").(*jwt.Claims)
 			c.JSON(http.StatusOK, gin.H{
 				"user_id": claims.UserID,
 				"email":   claims.Email,
+				"role_id": claims.RoleID,
 			})
 		})
 	}

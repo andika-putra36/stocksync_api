@@ -5,6 +5,7 @@ RETURNS TABLE(
 	id INT
 	, user_id INT
 	, email VARCHAR(255)
+	, role_id INT
 	, token TEXT
 	, expired_at TIMESTAMP
 )
@@ -14,6 +15,7 @@ AS $$
 		refresh_tokens.id
 		, refresh_tokens.user_id
 		, users.email
+		, users.role_id
 		, refresh_tokens.token
 		, refresh_tokens.expired_at
 	FROM

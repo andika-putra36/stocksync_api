@@ -41,7 +41,7 @@ func (s *service) LogIn(input LoginRequest) (LoginResponse, error) {
 	}
 
 	// Generate access token
-	accessToken, err := jwt.GenerateAccessToken(loginCredential.UserID, loginCredential.Email)
+	accessToken, err := jwt.GenerateAccessToken(loginCredential.UserID, loginCredential.Email, loginCredential.RoleID)
 	if err != nil {
 		return LoginResponse{}, err
 	}
@@ -98,7 +98,7 @@ func (s *service) RefreshToken(input RefreshTokenRequest) (RefreshTokenResponse,
 		return RefreshTokenResponse{}, errors.New("Refresh token expired")
 	}
 
-	accessToken, err := jwt.GenerateAccessToken(tokenData.UserID, tokenData.Email)
+	accessToken, err := jwt.GenerateAccessToken(tokenData.UserID, tokenData.Email, tokenData.RoleID)
 	if err != nil {
 		return RefreshTokenResponse{}, err
 	}

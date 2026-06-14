@@ -41,3 +41,21 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func RoleMiddleware(allowedRoles ...int) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		claims := c.MustGet("claims").(*jwt.Claims)
+
+		for _, role := range allowedRoles {
+			if claims.RoleID == role {
+				c.Next()
+				return
+			}
+		}
+
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "you don't have permission",
+		})
+		c.Abort()
+	}
+}
